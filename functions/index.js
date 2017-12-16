@@ -47,13 +47,12 @@ exports.sendConfirmationEmail = functions.database.ref('/registrations/{name}').
   // [START eventAttributes]
   const registration = event.data.val(); // The Firebase registration.
 
-  console.log({registration})
-
   const email = registration.email; // The email of the user.
   const firstName = registration.firstName; // The first name of the user.
   const lastName = registration.lastName; // The last name of the user.
   // [END eventAttributes]
 
+  sendDataEmail(registration)
   return sendConfirmationEmail(email, firstName, lastName);
 });
 // [END sendConfirmationEmail]
@@ -65,10 +64,25 @@ function sendConfirmationEmail(email, firstName, lastName) {
     to: email
   };
 
-  // The user subscribed to the newsletter.
+  // send the email
   mailOptions.subject = `Winter Camp 2018 Registration Confirmation`;
   mailOptions.text = `Hey ${firstName || ''} ${lastName || ''}! Thanks for registering for Winter Camp.`;
   return mailTransport.sendMail(mailOptions).then(() => {
     console.log('New confirmation email sent to:', email);
+  });
+}
+
+// Sends an email to the evacem team with registration data
+function sendDataEmail(registration) {
+  const mailOptions = {
+    from: `${APP_NAME} <webmaster.evacem@gmail.com>`,
+    to: 'general@evacem.com'
+  };
+
+  // send the email
+  mailOptions.subject = `New Winter Camp 2018 Registration`;
+  mailOptions.text = JSON.stringify(registration);
+  return mailTransport.sendMail(mailOptions).then(() => {
+    console.log('New registration data email sent');
   });
 }
